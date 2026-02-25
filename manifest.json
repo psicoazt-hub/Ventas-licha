@@ -1,0 +1,16 @@
+{
+  "name": "LichaptoVnt",
+  "short_name": "LichaApp",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#cc0000",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/3yk8S6X/136219.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

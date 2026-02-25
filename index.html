@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LichaApp - Inventario y Ventas</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f4f4f4; padding: 10px; }
+        .container { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        img { width: 100px; height: auto; margin-bottom: 5px; }
+        .inventario-box { background: #d1ecf1; padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #bee5eb; }
+        .calc-box { background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ffeeba; }
+        .total-destacado { font-size: 24px; font-weight: bold; color: #0c5460; }
+        label { font-size: 14px; font-weight: bold; color: #555; display: block; margin-top: 10px; }
+        input { width: 85%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 18px; text-align: center; }
+        button { width: 90%; padding: 14px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .btn-carga { background-color: #17a2b8; color: white; }
+        .btn-reg { background-color: #007bff; color: white; }
+        .btn-wa { background-color: #25d366; color: white; margin-top: 20px; }
+        .btn-del { background-color: #dc3545; color: white; width: auto; padding: 5px 8px; font-size: 11px; }
+        #historial { margin-top: 20px; text-align: left; background: #eee; padding: 10px; border-radius: 5px; font-size: 14px; }
+        .venta-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="logo.png" alt="Logo Tortillas Licha">
+    
+    <div id="seccion-carga" class="inventario-box">
+        <label>¿Cuántos paquetes llevas hoy?</label>
+        <input type="number" id="carga-inicial" placeholder="Total inicial" inputmode="numeric">
+        <button class="btn-carga" onclick="establecerCarga()">ESTABLECER CARGA</button>
+    </div>
+
+    <div id="monitor-inventario" class="inventario-box" style="display:none;">
+        <span style="font-size: 12px;">EN CAMIONETA:</span><br>
+        <span id="stock-actual" class="total-destacado">0</span> <small>paq.</small>
+    </div>
+
+    <div class="calc-box">
+        <span style="font-size: 12px;">COBRAR AHORA:</span>
+        <span id="cobro-inmediato" style="font-size: 24px; font-weight: bold; color: #856404; display: block;">$0.00</span>
+    </div>
+    
+    <label>Precio por paquete ($):</label>
+    <input type="number" id="precio" value="20" oninput="calcularCobro()" inputmode="numeric">
+    
+    <label>Cantidad a entregar:</label>
+    <input type="number" id="cantidad" placeholder="0" oninput="calcularCobro()" inputmode="numeric">
+    
+    <button class="btn-reg" onclick="registrarVenta()">COBRADO - REGISTRAR VENTA</button>
+    
+    <div id="historial" style="display:none;">
+        <strong>Ventas Registradas:</strong>
+        <div id="lista-ventas"></div>
+        <div id="resumen-inventario" style="margin-top:10px; border-top:1px solid #ccc; padding-top:10px; font-weight:bold;"></div>
+    </div>
+
+    <button class="btn-wa" onclick="enviarWhatsApp()">ENVIAR CORTE COMPLETO</button>
+    <p style="font-size: 10px; margin-top: 20px;">By Antonio Zavala Tolentino</p>
+</div>
+
+<script>
+    let stockTotal = 0;
+    let ventas = [];
+
+    function establecerCarga() {
+        const carga = document.getElementById('carga-inicial').value;
+        if (carga > 0) {
+            stockTotal = parseInt(carga);
+            document.getElementById('stock-actual').innerText = stockTotal;
+            document.getElementById('seccion-carga').style.display = 'none';
+            document.getElementById('monitor-inventario').style.display = 'block';
+        }
+    }
+
+    function calcularCobro() {
+        const cant = document.getElementById('cantidad').value || 0;
+        const prec = document.getElementById('precio').value || 0;
+        const total = parseFloat(cant) * parseFloat(prec);
+        document.getElementById('cobro-inmediato').innerText = `$${total.toFixed(2)}`;
+    }
+
+    function registrarVenta() {
+        const inputCant = document.getElementById('cantidad');
+        const inputPrec = document.getElementById('precio');
+        const cantidad = parseInt(inputCant.value);
+        const precio = parseFloat(inputPrec.value);
+        
+        if (cantidad > 0 && precio > 0) {
+            if (cantidad > stockTotal) {
+                alert("¡Cuidado! No tienes suficientes paquetes en inventario.");
+                return;
+            }
+            ventas.push({ cantidad, precio, subtotal: cantidad * precio });
+            stockTotal -= cantidad;
+            inputCant.value = '';
+            document.getElementById('stock-actual').innerText = stockTotal;
+            calcularCobro();
+            actualizarInterfaz();
+        } else {
+            alert("Ingresa cantidad y precio válidos");
+        }
+    }
+
+    function borrarVenta(index) {
+        if (confirm("¿Borrar esta visita? Se devolverá al inventario.")) {
+            stockTotal += ventas[index].cantidad;
+            ventas.splice(index, 1);
+            document.getElementById('stock-actual').innerText = stockTotal;
+            actualizarInterfaz();
+        }
+    }
+
+    function actualizarInterfaz() {
+        const lista = document.getElementById('lista-ventas');
+        const divHistorial = document.getElementById('historial');
+        const resumen = document.getElementById('resumen-inventario');
+        lista.innerHTML = '';
+
+        if (ventas.length > 0) {
+            divHistorial.style.display = 'block';
+            let totalPaq = 0;
+            let totalDinero = 0;
+
+            ventas.forEach((v, index) => {
+                totalPaq += v.cantidad;
+                totalDinero += v.subtotal;
+                lista.innerHTML += `
+                    <div class="venta-item">
+                        <span>V${index + 1}: ${v.cantidad} paq x $${v.precio} = $${v.subtotal}</span>
+                        <button class="btn-del" onclick="borrarVenta(${index})">X</button>
+                    </div>`;
+            });
+
+            resumen.innerHTML = `
+                <p>Paquetes Vendidos: ${totalPaq}</p>
+                <p>TOTAL DINERO: $${totalDinero.toFixed(2)}</p>
+                <p style="color:red;">DEBEN SOBRAR: ${stockTotal} paq.</p>
+            `;
+        } else {
+            divHistorial.style.display = 'none';
+        }
+    }
+
+    function enviarWhatsApp() {
+        if (ventas.length === 0) return alert("Sin datos.");
+        let totalPaq = 0;
+        let totalDinero = 0;
+        let mensaje = `*CORTE - LichaApp*%0A`;
+        mensaje += `--------------------------%0A`;
+        ventas.forEach((v, i) => {
+            totalPaq += v.cantidad; totalDinero += v.subtotal;
+            mensaje += `V${i + 1}: ${v.cantidad} paq ($${v.subtotal})%0A`;
+        });
+        mensaje += `--------------------------%0A`;
+        mensaje += `*VENDIDOS: ${totalPaq}*%0A`;
+        mensaje += `*DINERO: $${totalDinero.toFixed(2)}*%0A`;
+        mensaje += `*SOBRAN EN RUTA: ${stockTotal} paq.*`;
+        window.open(`https://wa.me/?text=${mensaje}`, '_blank');
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
+</body>
+</html>
