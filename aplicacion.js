@@ -1,3 +1,52 @@
+// ==========================================
+// SISTEMA LICHA V2.0 - ZAVALA INC COMPANY
+// ==========================================
+const FECHA_LIMITE = new Date('2026-03-17T17:00:00'); 
+
+if (new Date() > FECHA_LIMITE) {
+    document.body.innerHTML = `
+        <div style="background:#000;color:#fff;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:25px;font-family:sans-serif;">
+            <h1 style="color:#FFD700;font-size:2em;margin-bottom:10px;">⚠️ FIN DE PERIODO DE PRUEBA</h1>
+            <h2 style="font-weight:lighter;font-size:1.1em;margin-bottom:20px;">PARA ACTIVAR EL USO ILIMITADO TRANSFIERE:</h2>
+            <div style="background:#111;padding:20px;border-radius:15px;margin-bottom:20px;border:2px solid #FFD700;box-shadow: 0 0 15px rgba(255,215,0,0.2);">
+                <p style="font-size:2.5em;color:#FFD700;margin:0;font-weight:bold;">$1,500.00</p>
+                <hr style="border:0;border-top:1px solid #333;margin:15px 0;">
+                <p style="font-size:0.8em;color:#888;margin-bottom:5px;">NÚMERO DE CUENTA CLABE (PARA COPIAR):</p>
+                <p style="font-size:1.4em;letter-spacing:1px;margin:0;color:#fff;background:#222;padding:10px;border-radius:5px;user-select:all;cursor:pointer;">127496001713669897</p>
+                <p style="margin:15px 0 5px 0;font-size:1.1em;color:#fff;">BANCO AZTECA</p>
+                <p style="margin:0;font-size:1.1em;color:#FFD700;font-weight:bold;">ANTONIO ZAVALA TOLENTINO</p>
+            </div>
+            <p style="font-size:1em;color:#ccc;">Una vez realizado el pago, envía tu comprobante:</p>
+            <p style="font-size:1.3em;color:#00E676;font-weight:bold;margin-top:5px;">📱 Cel: 4434918712</p>
+            <footer style="margin-top:40px;font-size:0.6em;color:#444;text-transform:uppercase;letter-spacing:2px;">
+                © TODOS LOS DERECHOS RESERVADOS BY ZAVALA INC COMPANY
+            </footer>
+        </div>`;
+    window.stop();
+}
+
+// FUNCIÓN DE MAPEO PARA GOOGLE MAPS (PERSISTENTE)
+function registrarVentaConGPS(cliente) {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            // Crea el link directo para abrir en la App de Google Maps
+            const urlMaps = `https://www.google.com/maps?q=${lat},${lng}`;
+            
+            // Guarda en la memoria del cel para que no se borre
+            let historial = JSON.parse(localStorage.getItem('rutasLicha')) || [];
+            historial.push({cliente: cliente, coords: urlMaps, fecha: new Date().toLocaleString()});
+            localStorage.setItem('rutasLicha', JSON.stringify(historial));
+
+            console.log("Punto guardado: " + urlMaps);
+            alert("✅ Venta registrada. Ubicación guardada para Google Maps.");
+        }, function(objError) {
+            alert("⚠️ Activa el GPS para que la app pueda mapear la ruta de venta.");
+        });
+    }
+}
 // SISTEMA LICHA V2.0 - BY ANTONIO ZAVALA TOLENTINO
 let data = JSON.parse(localStorage.getItem('licha_master_v2')) || {
     usuario: null,
