@@ -17,7 +17,7 @@ if (new Date() > FECHA_LIMITE) {
                 <p style="margin:0;font-size:1.1em;color:#FFD700;font-weight:bold;">ANTONIO ZAVALA TOLENTINO</p>
             </div>
             <p style="font-size:1em;color:#ccc;">Una vez realizado el pago, envía tu comprobante:</p>
-            <p style="font-size:1.3em;color:#00E676;font-weight:bold;margin-top:5px;">📱 Cel: 4434918712</p>
+            <p style="font-size:1.3em;color:#00E676;font-weight:bold;margin-top:5px;">📱 Cel: 4439167078</p>
             <footer style="margin-top:40px;font-size:0.6em;color:#444;text-transform:uppercase;letter-spacing:2px;">
                 © TODOS LOS DERECHOS RESERVADOS BY ZAVALA INC COMPANY
             </footer>
